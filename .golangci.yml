@@ -1,3 +1,5 @@
+version: "2"
+
 run:
   timeout: 5m
   allow-parallel-runners: true
@@ -21,22 +23,16 @@ linters:
   enable:
     - dupl
     - errcheck
-    - exportloopref
     - ginkgolinter
     - goconst
     - gocyclo
-    - gofmt
-    - goimports
-    - gosimple
     - govet
     - ineffassign
-    - lll
     - misspell
     - nakedret
     - prealloc
     - revive
     - staticcheck
-    - typecheck
     - unconvert
     - unparam
     - unused
@@ -45,3 +41,9 @@ linters-settings:
   revive:
     rules:
       - name: comment-spacings
+
+formatters:
+  disable-all: true
+  enable:
+    - gofmt
+    - goimports

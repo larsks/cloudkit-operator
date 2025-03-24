@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Important: Run "make" to regenerate code after modifying this file
 package v1alpha1
+
+// Important: Run "make" to regenerate code after modifying this file
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,33 +30,44 @@ type ClusterOrderSpec struct {
 	TemplateID string `json:"templateID,omitempty"`
 }
 
+// ClusterOrderPhaseType is a valid value for .status.phase
 type ClusterOrderPhaseType string
 
 const (
-	// Initial value
+	// ClusterOrderPhaseUnknown is the zero value of .status.phase
 	ClusterOrderPhaseUnknown ClusterOrderPhaseType = "Unknown"
 
-	// Order has been accepted but work has not yet started
+	// ClusterOrderPhaseAccepted means the order has been accepted but work has not yet started
 	ClusterOrderPhaseAccepted ClusterOrderPhaseType = "Accepted"
 
-	// Cluster update is in progress
+	// ClusterOrderPhaseProgressing means an update is in progress
 	ClusterOrderPhaseProgressing ClusterOrderPhaseType = "Progressing"
 
-	// Failed to create or update cluster
+	// ClusterOrderPhaseFailed means the cluster deployment or update has failed
 	ClusterOrderPhaseFailed ClusterOrderPhaseType = "Failed"
 
-	// All resources associated with this ClusterOrder are ready
+	// ClusterOrderPhaseReady means the cluster and all associated resources are ready
 	ClusterOrderPhaseReady ClusterOrderPhaseType = "Ready"
 )
 
+// ClusterOrderConditionType is a valid value for .status.conditions.type
 type ClusterOrderConditionType string
 
 const (
-	ClusterOrderConditionAccepted              ClusterOrderConditionType = "Accepted"
-	ClusterOrderConditionProgressing           ClusterOrderConditionType = "Progressing"
+	// ClusterOrderConditionAccepted means the order has been accepted but work has not yet started
+	ClusterOrderConditionAccepted ClusterOrderConditionType = "Accepted"
+
+	// ClusterOrderConditionProgressing means that an update is in progress
+	ClusterOrderConditionProgressing ClusterOrderConditionType = "Progressing"
+
+	// ClusterOrderConditionControlPlaneAvailable means the cluster control plane is ready
 	ClusterOrderConditionControlPlaneAvailable ClusterOrderConditionType = "ControlPlaneAvailable"
-	ClusterOrderConditionNodePoolAvailable     ClusterOrderConditionType = "NodePoolAvailable"
-	ClusterOrderConditionAvailable             ClusterOrderConditionType = "Available"
+
+	// ClusterOrderConditionNodePoolAvailable means the node pool has the correct number of nodes
+	ClusterOrderConditionNodePoolAvailable ClusterOrderConditionType = "NodePoolAvailable"
+
+	// ClusterOrderConditionAvailable means the cluster is available
+	ClusterOrderConditionAvailable ClusterOrderConditionType = "Available"
 )
 
 // ClusterOrderStatus defines the observed state of ClusterOrder
