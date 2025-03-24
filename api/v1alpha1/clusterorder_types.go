@@ -14,28 +14,57 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Important: Run "make" to regenerate code after modifying this file
 package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // ClusterOrderSpec defines the desired state of ClusterOrder
 type ClusterOrderSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of ClusterOrder. Edit clusterorder_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+  // TemplateID is the unique identigier of the cluster template to use when creating this cluster
+	TemplateID string `json:"templateID,omitempty"`
 }
+
+type ClusterOrderPhaseType string
+
+const (
+	// Initial value
+	ClusterOrderPhaseUnknown ClusterOrderPhaseType = "Unknown"
+
+	// Order has been accepted but work has not yet started
+	ClusterOrderPhaseAccepted ClusterOrderPhaseType = "Accepted"
+
+	// Cluster update is in progress
+	ClusterOrderPhaseProgressing ClusterOrderPhaseType = "Progressing"
+
+	// Failed to create or update cluster
+	ClusterOrderPhaseFailed ClusterOrderPhaseType = "Failed"
+
+	// All resources associated with this ClusterOrder are ready
+	ClusterOrderPhaseReady ClusterOrderPhaseType = "Ready"
+)
+
+type ClusterOrderConditionType string
+
+const (
+	ClusterOrderConditionAccepted              ClusterOrderConditionType = "Accepted"
+	ClusterOrderConditionProgressing           ClusterOrderConditionType = "Progressing"
+	ClusterOrderConditionControlPlaneAvailable ClusterOrderConditionType = "ControlPlaneAvailable"
+	ClusterOrderConditionNodePoolAvailable     ClusterOrderConditionType = "NodePoolAvailable"
+	ClusterOrderConditionAvailable             ClusterOrderConditionType = "Available"
+)
 
 // ClusterOrderStatus defines the observed state of ClusterOrder
 type ClusterOrderStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Phase provides a single-value overview of the state of the ClusterOrder
+	Phase ClusterOrderPhaseType `json:"phase,omitempty"`
+
+	// Conditions holds an array of metav1.Condition that describe the state of the ClusterOrder
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
 }
 
 // +kubebuilder:object:root=true
