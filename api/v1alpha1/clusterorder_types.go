@@ -66,12 +66,17 @@ const (
 	// ClusterOrderConditionControlPlaneAvailable means the cluster control plane is ready
 	ClusterOrderConditionControlPlaneAvailable ClusterOrderConditionType = "ControlPlaneAvailable"
 
-	// ClusterOrderConditionNodePoolAvailable means the node pool has the correct number of nodes
-	ClusterOrderConditionNodePoolAvailable ClusterOrderConditionType = "NodePoolAvailable"
-
 	// ClusterOrderConditionAvailable means the cluster is available
 	ClusterOrderConditionAvailable ClusterOrderConditionType = "Available"
 )
+
+// ClusterOrderClusterReferenceType contains a reference to the namespace created by this ClusterOrder
+type ClusterOrderClusterReferenceType struct {
+	// Namespace that contains the HostedCluster resource
+	ClusterNamespace   string `json:"clusterNamespace"`
+	ClusterName        string `json:"clusterName"`
+	ServiceAccountName string `json:"serviceAccountName"`
+}
 
 // ClusterOrderStatus defines the observed state of ClusterOrder
 type ClusterOrderStatus struct {
@@ -83,6 +88,9 @@ type ClusterOrderStatus struct {
 
 	// Conditions holds an array of metav1.Condition that describe the state of the ClusterOrder
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
+
+	// Reference to the namespace that contains the HostedCluster resource
+	ClusterReference ClusterOrderClusterReferenceType `json:"clusterReference"`
 }
 
 // +kubebuilder:object:root=true

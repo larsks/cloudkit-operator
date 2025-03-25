@@ -50,6 +50,22 @@ spec:
           status:
             description: ClusterOrderStatus defines the observed state of ClusterOrder
             properties:
+              clusterReference:
+                description: Reference to the namespace that contains the HostedCluster
+                  resource
+                properties:
+                  clusterName:
+                    type: string
+                  clusterNamespace:
+                    description: Namespace that contains the HostedCluster resource
+                    type: string
+                  serviceAccountName:
+                    type: string
+                required:
+                - clusterName
+                - clusterNamespace
+                - serviceAccountName
+                type: object
               conditions:
                 description: Conditions holds an array of metav1.Condition that describe
                   the state of the ClusterOrder
@@ -119,6 +135,7 @@ spec:
                 - Ready
                 type: string
             required:
+            - clusterReference
             - phase
             type: object
         type: object
