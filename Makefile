@@ -51,6 +51,8 @@ endif
 OPERATOR_SDK_VERSION ?= v1.39.1
 # Image URL to use all building/pushing image targets
 IMG ?= ghcr.io/innabox/cloudkit-operator:latest
+# Name of Containerfile
+CONTAINERFILE ?= Containerfile
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.31.0
 
@@ -140,9 +142,9 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # If you wish to build the manager image targeting other platforms you can use the --platform flag.
 # (i.e. docker build --platform linux/arm64). However, you must enable docker buildKit for it.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
-.PHONY: docker-build
-docker-build: ## Build docker image with the manager.
-	$(CONTAINER_TOOL) build -t ${IMG} .
+.PHONY: image-build
+image-build: ## Build docker image with the manager.
+	$(CONTAINER_TOOL) build -t ${IMG} -f ${CONTAINERFILE} .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
