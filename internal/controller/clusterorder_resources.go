@@ -29,10 +29,9 @@ func (r *ClusterOrderReconciler) newNamespace(ctx context.Context, instance *v1a
 		},
 	}
 
-	instance.SetClusterReferenceNamespace(namespaceName)
-
 	mutateFn := func() error {
 		ensureCommonLabels(instance, namespace)
+		instance.SetClusterReferenceNamespace(namespaceName)
 		return nil
 	}
 
@@ -49,7 +48,6 @@ func (r *ClusterOrderReconciler) newServiceAccount(ctx context.Context, instance
 	}
 
 	serviceAccountName := defaultServiceAccountName
-	instance.SetClusterReferenceServiceAccountName(serviceAccountName)
 
 	sa := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
@@ -61,6 +59,7 @@ func (r *ClusterOrderReconciler) newServiceAccount(ctx context.Context, instance
 
 	mutateFn := func() error {
 		ensureCommonLabels(instance, sa)
+		instance.SetClusterReferenceServiceAccountName(serviceAccountName)
 		return nil
 	}
 
@@ -101,9 +100,8 @@ func (r *ClusterOrderReconciler) newAdminRoleBinding(ctx context.Context, instan
 		},
 	}
 
-	instance.SetClusterReferenceRoleBindingName(roleBindingName)
-
 	mutateFn := func() error {
+		instance.SetClusterReferenceRoleBindingName(roleBindingName)
 		ensureCommonLabels(instance, roleBinding)
 		roleBinding.Subjects = subjects
 		roleBinding.RoleRef = roleref
