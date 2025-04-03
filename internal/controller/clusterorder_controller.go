@@ -186,19 +186,8 @@ func (r *ClusterOrderReconciler) mapObjectToCluster(ctx context.Context, obj cli
 func (r *ClusterOrderReconciler) handleUpdate(ctx context.Context, _ ctrl.Request, instance *v1alpha1.ClusterOrder) (ctrl.Result, error) {
 	log := ctrllog.FromContext(ctx)
 
-	// Do we have a finalizer yet?
-	if !controllerutil.ContainsFinalizer(instance, cloudkitFinalizer) {
-		controllerutil.AddFinalizer(instance, cloudkitFinalizer)
+	if controllerutil.AddFinalizer(instance, cloudkitFinalizer) {
 		if err := r.Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-
-	// Do we have a clusterReference yet?
-	if instance.Status.ClusterReference == nil {
-		log.Info("Adding cluster reference")
-		instance.Status.ClusterReference = &v1alpha1.ClusterOrderClusterReferenceType{}
-		if err := r.Status().Update(ctx, instance); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -300,9 +289,10 @@ func (r *ClusterOrderReconciler) handleDelete(ctx context.Context, _ ctrl.Reques
 		return ctrl.Result{}, err
 	}
 
-	controllerutil.RemoveFinalizer(instance, cloudkitFinalizer)
-	if err := r.Update(ctx, instance); err != nil {
-		return ctrl.Result{}, err
+	if controllerutil.RemoveFinalizer(instance, cloudkitFinalizer) {
+		if err := r.Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	return ctrl.Result{}, nil
