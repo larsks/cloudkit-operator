@@ -5,20 +5,37 @@ import (
 	"fmt"
 	"maps"
 
-	"github.com/innabox/cloudkit-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/innabox/cloudkit-operator/api/v1alpha1"
 )
 
 func (r *ClusterOrderReconciler) newNamespace(ctx context.Context, instance *v1alpha1.ClusterOrder) (*appResource, error) {
-	namespaceName := instance.GetClusterReferenceNamespace()
-	if namespaceName == "" {
+	log := ctrllog.FromContext(ctx)
+
+	var namespaceList corev1.NamespaceList
+	var namespaceName string
+
+	if err := r.List(ctx, &namespaceList, labelSelectorFromInstance(instance)); err != nil {
+		log.Error(err, "Failed to list namespaces")
+		return nil, err
+	}
+
+	if len(namespaceList.Items) > 1 {
+		return nil, fmt.Errorf("found multiple matching namespaces for %s", instance.GetName())
+	}
+
+	if len(namespaceList.Items) == 0 {
 		namespaceName = generateNamespaceName(instance)
 		if namespaceName == "" {
 			return nil, fmt.Errorf("failed to generate namespace name")
 		}
+	} else {
+		namespaceName = namespaceList.Items[0].GetName()
 	}
 
 	namespace := &corev1.Namespace{
