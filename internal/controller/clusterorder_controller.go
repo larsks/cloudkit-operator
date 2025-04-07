@@ -134,11 +134,29 @@ func (r *ClusterOrderReconciler) Reconcile(ctx context.Context, req ctrl.Request
 			if err := r.Status().Update(ctx, instance); err != nil {
 				return res, err
 			}
+			if err := r.updateFulfillmentService(ctx, instance); err != nil {
+				return res, err
+			}
 		}
 	}
 
 	log.Info(fmt.Sprintf("End reconcile for %s", instance.GetName()))
 	return res, err
+}
+
+// updateFulfillmentService sends a staus update to the fulfillment service
+// if an endpoint has been configured
+//
+//nolint:unparam
+func (r *ClusterOrderReconciler) updateFulfillmentService(ctx context.Context, instance *v1alpha1.ClusterOrder) error {
+	log := ctrllog.FromContext(ctx)
+	// clusterOrderUUID, exists := instance.GetLabels()[cloudkitClusterOrderUUIDLabel]
+	_, exists := instance.GetLabels()[cloudkitClusterOrderUUIDLabel]
+	if !exists {
+		log.Info(fmt.Sprintf("no fulfillment service uuid for clusterorder %s", instance.GetName()))
+		return nil
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

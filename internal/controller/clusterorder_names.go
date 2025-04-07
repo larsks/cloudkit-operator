@@ -19,6 +19,7 @@ const (
 
 var (
 	cloudkitClusterOrderNameLabel string = fmt.Sprintf("%s/clusterorder", cloudkitNamePrefix)
+	cloudkitClusterOrderUUIDLabel string = fmt.Sprintf("%s/clusterorder-id", cloudkitNamePrefix)
 	cloudkitFinalizer             string = fmt.Sprintf("%s/finalizer", cloudkitNamePrefix)
 )
 
