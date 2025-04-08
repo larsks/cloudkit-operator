@@ -120,6 +120,8 @@ type ClusterOrderStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:shortName=cord
+// +kubebuilder:printcolumn:name="Template",type=string,JSONPath=`.spec.templateID`
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`
 
 // ClusterOrder is the Schema for the clusterorders API
 type ClusterOrder struct {
