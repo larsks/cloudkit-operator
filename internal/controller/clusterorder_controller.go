@@ -32,7 +32,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllerutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -133,21 +132,11 @@ func (r *ClusterOrderReconciler) Reconcile(ctx context.Context, req ctrl.Request
 }
 
 func NamespacePredicate(namespace string) predicate.Predicate {
-	return predicate.Funcs{
-		CreateFunc: func(e event.CreateEvent) bool {
-			return e.Object.GetNamespace() == namespace
+	return predicate.NewPredicateFuncs(
+		func(obj client.Object) bool {
+			return obj.GetNamespace() == namespace
 		},
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			return e.ObjectNew.GetNamespace() == namespace
-			// You might also want to check e.ObjectOld if relevant for your logic
-		},
-		DeleteFunc: func(e event.DeleteEvent) bool {
-			return e.Object.GetNamespace() == namespace
-		},
-		GenericFunc: func(e event.GenericEvent) bool {
-			return e.Object.GetNamespace() == namespace
-		},
-	}
+	)
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -367,13 +356,13 @@ func (r *ClusterOrderReconciler) handleNoHostedCluster(ctx context.Context,
 	return ctrl.Result{}, nil
 }
 
-func hostedClusterIsReady(hc *hypershiftv1beta1.HostedCluster) bool {
-	return (meta.IsStatusConditionTrue(hc.Status.Conditions, "ClusterVersionSucceeding") &&
+func hostedClusterControlPlaneIsAvailable(hc *hypershiftv1beta1.HostedCluster) bool {
+	return (meta.IsStatusConditionTrue(hc.Status.Conditions, "Available") &&
 		meta.IsStatusConditionFalse(hc.Status.Conditions, "Degraded"))
 }
 
-func hostedClusterControlPlaneIsAvailable(hc *hypershiftv1beta1.HostedCluster) bool {
-	return (meta.IsStatusConditionTrue(hc.Status.Conditions, "Available") &&
+func hostedClusterIsReady(hc *hypershiftv1beta1.HostedCluster) bool {
+	return (meta.IsStatusConditionTrue(hc.Status.Conditions, "ClusterVersionSucceeding") &&
 		meta.IsStatusConditionFalse(hc.Status.Conditions, "Degraded"))
 }
 
@@ -434,7 +423,12 @@ func (r *ClusterOrderReconciler) handleDelete(ctx context.Context, _ ctrl.Reques
 
 	if ns != nil {
 		// Attempt to delete hostedcluster via webhook
-		if hc, err := r.findHostedCluster(ctx, instance, ns.GetName()); hc != nil {
+		hc, err := r.findHostedCluster(ctx, instance, ns.GetName())
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		if hc != nil {
 			log.Info(fmt.Sprintf("Waiting for HostedCluster %s to delete", hc.GetName()))
 			if url := r.DeleteClusterWebhook; url != "" {
 				if err := triggerWebHook(ctx, url, instance); err != nil {
